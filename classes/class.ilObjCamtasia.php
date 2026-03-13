@@ -14,6 +14,8 @@ class ilObjCamtasia extends ilObjectPlugin
 
 	protected $online; // [bool]
 
+	private $player_file;
+
 	/**
 	* Constructor
 	*

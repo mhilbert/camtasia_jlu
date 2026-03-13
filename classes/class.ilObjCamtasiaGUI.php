@@ -17,6 +17,8 @@ require_once("./Services/Form/classes/class.ilFileInputGUI.php");
 */
 class ilObjCamtasiaGUI extends ilObjectPluginGUI
 {
+	private $form;
+
 	/**
 	* Handles all commmands of this class, centralizes permission checks
 	*/
