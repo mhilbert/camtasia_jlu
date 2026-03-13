@@ -1,28 +1,4 @@
 <?php
-/*
-	+-----------------------------------------------------------------------------+
-	| ILIAS open source                                                           |
-	+-----------------------------------------------------------------------------+
-	| Copyright (c) 1998-2001 ILIAS open source, University of Cologne            |
-	|                                                                             |
-	| This program is free software; you can redistribute it and/or               |
-	| modify it under the terms of the GNU General Public License                 |
-	| as published by the Free Software Foundation; either version 2              |
-	| of the License, or (at your option) any later version.                      |
-	|                                                                             |
-	| This program is distributed in the hope that it will be useful,             |
-	| but WITHOUT ANY WARRANTY; without even the implied warranty of              |
-	| MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               |
-	| GNU General Public License for more details.                                |
-	|                                                                             |
-	| You should have received a copy of the GNU General Public License           |
-	| along with this program; if not, write to the Free Software                 |
-	| Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA. |
-	+-----------------------------------------------------------------------------+
-*/
-
-include_once("./Services/Repository/classes/class.ilObjectPluginAccess.php");
-
 /**
 * Access/Condition checking for the camtasia repository object
 * 
@@ -47,7 +23,8 @@ class ilObjCamtasiaAccess extends ilObjectPluginAccess
      *
      * @return	boolean		true, if everything is ok
      */
-    function _checkAccess($a_cmd, $a_permission, $a_ref_id, $a_obj_id, $a_user_id = "")
+     
+    public function _checkAccess(string $a_cmd, string $a_permission, int $a_ref_id, int $a_obj_id, ?int $a_user_id = null): bool
     {
         global $ilUser, $ilAccess;
         
@@ -59,7 +36,7 @@ class ilObjCamtasiaAccess extends ilObjectPluginAccess
 			$objDefinition->obj_data['xcam']['allow_copy'] = 1;
 		}
                 
-        if ($a_user_id == "")
+        if (!$a_user_id)
         {
             $a_user_id = $ilUser->getId();
         }
@@ -90,20 +67,37 @@ class ilObjCamtasiaAccess extends ilObjectPluginAccess
             " WHERE id = ".$ilDB->quote($a_id, "integer")
         );
         $rec  = $ilDB->fetchAssoc($set);
-        return (boolean) $rec["is_online"];
+        if($rec !== null && $rec['is_online']) {
+                return (bool) $rec['is_online'];
+        }
+        return false;
     }
     /**
      * Check Playerfile status
      */
     static function checkPlayerfile($a_id)
-	{
-		global $ilDB;
+    {
+        global $ilDB;
 	
-		$set = $ilDB->query("SELECT player_file FROM rep_robj_xcam_data".
+        $set = $ilDB->query("SELECT player_file FROM rep_robj_xcam_data".
             " WHERE id = ".$ilDB->quote($a_id, "integer")
         );                    
-		$rec  = $ilDB->fetchAssoc($set);
-		return (boolean) $rec["player_file"];
-	}
+        $rec  = $ilDB->fetchAssoc($set);
+        return (boolean) $rec["player_file"];
+    }
+    public function canBeDelivered(ilWACPath $ilWACPath): bool
+    {
+        /**
+         * @var $ilAccess ilAccess
+         */
+        global $ilAccess;
+        preg_match("/\\/xcam_([\\d]*)\\//uism", $ilWACPath->getPath(), $results);
+
+        foreach (ilObject2::_getAllReferences($results[1]) as $ref_id) {
+            if ($ilAccess->checkAccess('read', '', $ref_id)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
-?>

@@ -1,8 +1,6 @@
 <?php
-require_once("./Services/Repository/classes/class.ilObjectPluginGUI.php");
-require_once("./Modules/File/classes/class.ilObjFileGUI.php");
-require_once("./Services/Form/classes/class.ilFileInputGUI.php");
-require_once("./Services/Utilities/classes/class.ilFileUtils.php");
+require_once(ILIAS_ABSOLUTE_PATH . "/components/ILIAS/File/classes/class.ilObjFileGUI.php");
+require_once(ILIAS_ABSOLUTE_PATH . "/components/ILIAS/Form/classes/class.ilFileInputGUI.php");
 
 /**
 * User Interface class for the camtasia repository object.
@@ -14,22 +12,17 @@ require_once("./Services/Utilities/classes/class.ilFileUtils.php");
 *
 * $Id$
 *
-* Integration into control structure:
-* - The GUI class is called by ilRepositoryGUI
-* - GUI classes used by this class are ilPermissionGUI (provides the rbac
-*   screens) and ilInfoScreenGUI (handles the info screen).
-*
 * @ilCtrl_isCalledBy ilObjCamtasiaGUI: ilRepositoryGUI, ilAdministrationGUI, ilObjPluginDispatchGUI
 * @ilCtrl_Calls ilObjCamtasiaGUI: ilPermissionGUI, ilInfoScreenGUI, ilObjectCopyGUI, ilCommonActionDispatcherGUI, ilExportGUI
-*
-*
 */
 class ilObjCamtasiaGUI extends ilObjectPluginGUI
 {
+	private $form;
+
 	/**
 	* Handles all commmands of this class, centralizes permission checks
 	*/
-	function performCommand($cmd)
+	public function performCommand(string $cmd): void
 	{
 		$this->setTitleAndDescription();
         switch ($cmd)
@@ -53,7 +46,7 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 	/**
 	* Initialisation
 	*/
-	protected function afterConstructor()
+	protected function afterConstructor(): void
 	{
 		// anything needed after object has been constructed
 	}
@@ -61,7 +54,7 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 	/**
 	 * After object has been created -> jump to this command
 	 */
-	function getAfterCreationCmd()
+	public function getAfterCreationCmd(): string
 	{
 		return "uploadCamtasiaForm";
 	}
@@ -69,7 +62,7 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 	/**
 	 * Get standard command
 	 */
-	function getStandardCmd()
+	public function getStandardCmd(): string
 	{
 		return "showContent";
 	}
@@ -77,7 +70,7 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 	/**
 	* Get type.
 	*/
-	final function getType()
+	final public function getType(): string
 	{
 		return "xcam";
 	}
@@ -86,7 +79,7 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 	 * @param string $type
 	 * @return array
 	 */
-	protected function initCreationForms($type)
+	protected function initCreationForms(string $type): array
 	{
 		return array(
 			self::CFORM_NEW => $this->initCreateForm($type),
@@ -98,10 +91,9 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 	 * @param string $type
 	 * @return ilPropertyFormGUI
 	 */
-	public function  initCreateForm($type)
+	public function  initCreateForm(string $type): ilPropertyFormGUI
 	{
 		$form = parent::initCreateForm($type);
-		$this->plugin->includeClass('class.ilObjCamtasia.php');
 		
 		// Send additional information
 		$form->setDescription($this->txt('limitations'));
@@ -147,20 +139,20 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 		global $tpl, $ilTabs;
 
 		$ilTabs->activateTab("upload");
-		$this->initImportFormNew($this->getType());
+		$this->initImportFormNew();
 		$this->getPropertiesValues();
 		$tpl->setContent($this->form->getHTML());
 	}
 
-	protected function initImportFormNew($a_new_type)
+	protected function initImportFormNew()
 	{
 		global $lng, $tpl;
 		
-		include_once("Services/Form/classes/class.ilPropertyFormGUI.php");
+		include_once(ILIAS_ABSOLUTE_PATH . "/components/ILIAS/Form/classes/class.ilPropertyFormGUI.php");
 		$form_gui = new ilPropertyFormGUI();
-        $form_gui->setTitle($this->txt("new_Camtasia"));
+		$form_gui->setTitle($this->txt("new_Camtasia"));
 		//$form_gui->setMultipart(TRUE);
-		
+
         // title
         $tt = new ilTextInputGUI($this->txt("title"), "title");
         $tt->setRequired(true);
@@ -248,40 +240,46 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 	public function importCamtasiaAction()
 	{
 		global $ilErr, $tpl;
-        
+
         // create permission is already checked in createObject. This check here is done to prevent hacking attempts
 		if (!$this->checkPermissionBool("write", "", $this->getType()))
 		{
 			$ilErr->raiseError($this->txt("no_create_permission"));
 		}
-        
-        $this->initImportFormNew($a_new_import);
+
+        $this->initImportFormNew();
 
         if ($this->form->checkInput())
-                    
-		{
+        {
             $stream = $this->form->getInput("stream");
             $filesw = $this->form->getInput("filesw");
             $online = $this->form->getInput("online");
             $new_update = $this->form->getInput("newfile");
-            
-            if ($new_update == 0) { 
-                $this->updateProperties();}
+
+            if ($new_update === "") 
+            { 
+                $this->updateProperties();
+            }
             
             $server = $this->object->getVideoserver();
-            if (($new_update == 1) && (preg_match("#$server#", $stream))) {
-                 $this->importAsXCAMModule($stream, $filesw, $online);}    
-        }  
-            ilUtil::sendFailure($this->txt("no_link"), true);
-            $this->form->setValuesByPost();
-		    $tpl->setContent($this->form->getHtml());  
+            if (($new_update === "1") && (preg_match("#$server#", $stream))) 
+            {
+                 $this->importAsXCAMModule($stream, $filesw, $online);
+            }
+        }
+
+        $tpl->setOnScreenMessage('failure', $this->txt("no_link"), true);
+        $this->form->setValuesByPost();
+        $tpl->setContent($this->form->getHtml());  
     }
 
 	private function importAsXCAMModule($stream, $filesw, $online)
-	{   
+	{
+        global $tpl;
+
         // cleanup
         $data = $this->object->getDataDirectory('local');
-        ilUtil::delDir($data);
+        ilFileUtils::delDir($data);
          
         // template or new zip?   
             if ($filesw == "new_file") { 
@@ -295,7 +293,7 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
         $newObj->populateByDirectory($tempdir);
 		$newObj->sethttp($stream);
         $newObj->setOnline($online);
-        ilUtil::delDir($tempdir);
+        ilFileUtils::delDir($tempdir);
         
         // Auto-detect startfile
         $startSuffix = "_player.html";
@@ -369,9 +367,9 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 		
         // are this camtasia files?
         if ($newObj->getPlayerFile() != "")
-            { ilUtil::sendSuccess($this->txt("file_patched"), true); }
+            { $tpl->setOnScreenMessage('success',$this->txt("file_patched"), true); }
         else
-            { ilUtil::sendFailure($this->txt("file_not_patched"), true); }
+            { $tpl->setOnScreenMessage('failure',$this->txt("file_not_patched"), true); }
         
         $this->ctrl->redirect($this, "uploadCamtasiaForm");
         }
@@ -380,7 +378,7 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 	/**
 	 * Set tabs
 	 */
-	function setTabs()
+	protected function setTabs(): void
 	{
 		global $ilTabs, $ilCtrl, $ilAccess;
 
@@ -430,7 +428,7 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 	{
 		global $tpl, $lng, $ilCtrl;
 
-		$this->initImportFormNew($a_new_import2);
+		$this->initImportFormNew();
 		if ($this->form->checkInput())
 		{
 			$this->object->setTitle($this->form->getInput("title"));
@@ -460,7 +458,7 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 			ilChangeEvent::_catchupWriteEvents($this->object->getId(), $ilUser->getId());
             */
             
-			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
+			$tpl->setOnScreenMessage('success', $lng->txt("msg_obj_modified"), true);
 			$ilCtrl->redirect($this, "uploadCamtasiaForm");
 		}
 
@@ -481,7 +479,8 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 		if ($playerFile != "")
 		{
 			// Record read event
-			require_once('Services/Tracking/classes/class.ilChangeEvent.php');
+			require_once(ILIAS_ABSOLUTE_PATH . '/components/ILIAS/Tracking/classes/class.ilChangeEvent.php');
+
 			ilChangeEvent::_recordReadEvent($this->object->getType(), $this->object->getRefId(),
 				$this->object->getId(), $ilUser->getId());			
 
@@ -490,14 +489,14 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 			ilUtil::redirect($playerFileFullPath);
 		} else {
 			$ilTabs->activateTab("Content");
-			ilUtil::sendFailure($this->txt("no_record"));
+			$tpl->setOnScreenMessage('failure',$this->txt("no_record"));
 		}
 	}
 
 	/**
 	 * Export content
 	 */ 
-	public function executeCommand() 
+	public function executeCommand(): void
 	{
 		global $ilTabs, $tpl;
 
@@ -511,7 +510,7 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 			$tpl->loadStandardTemplate();
 
 			$ilTabs->activateTab("export");
-			include_once './Services/Export/classes/class.ilExportGUI.php';
+			include_once ILIAS_ABSOLUTE_PATH . '/components/ILIAS/Export/classes/class.ilExportGUI.php';
 			$exp_gui = new ilExportGUI($this);
 			 $exp_gui->addFormat('xml');
 			$exp_gui->addFormat("html", "", $this, "exportHTML");
@@ -520,7 +519,7 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 			break;
 
 		default:
-			return parent::executeCommand();
+			parent::executeCommand();
 		}
 	}
 
@@ -530,25 +529,22 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 	function exportHTML()
 	{
 		$inst_id = IL_INST_ID;
-		include_once("./Services/Export/classes/class.ilExport.php");
+		include_once(ILIAS_ABSOLUTE_PATH . "/components/ILIAS/Export/classes/class.ilExport.php");
 		
-		ilExport::_createExportDirectory($this->object->getId(), "html",
-			$this->object->getType());
-		$export_dir = ilExport::_getExportDirectory($this->object->getId(), "html",
-			$this->object->getType());
+		ilExport::_createExportDirectory($this->object->getId(), "html", $this->object->getType());
+		$export_dir = ilExport::_getExportDirectory($this->object->getId(), "html", $this->object->getType());
 		
 		$subdir = $this->object->getType()."_".$this->object->getId();
-		$filename = $this->subdir.".zip";
+		$filename = $subdir . ".zip";
 		$target_dir = $export_dir."/".$subdir;
-		ilUtil::delDir($target_dir);
-		ilUtil::makeDir($target_dir);
+		ilFileUtils::delDir($target_dir);
+		ilFileUtils::makeDir($target_dir);
 		$source_dir = $this->object->getDataDirectory();
-		ilUtil::rCopy($source_dir, $target_dir);
+		ilFileUtils::rCopy($source_dir, $target_dir);
 		// zip it all
 		$date = time();
-		$zip_file = $export_dir."/".$date."__".IL_INST_ID."__".
-			$this->object->getType()."_".$this->object->getId().".zip";
-		ilUtil::zip($target_dir, $zip_file);
-		ilUtil::delDir($target_dir);
+		$zip_file = $export_dir."/".$date."__".IL_INST_ID."__".$this->object->getType()."_".$this->object->getId().".zip";
+		ilFileUtils::zip($target_dir, $zip_file);
+		ilFileUtils::delDir($target_dir);
 	}
 }
