@@ -36,7 +36,7 @@ class ilObjCamtasiaAccess extends ilObjectPluginAccess
 			$objDefinition->obj_data['xcam']['allow_copy'] = 1;
 		}
                 
-        if ($a_user_id == "")
+        if (!$a_user_id)
         {
             $a_user_id = $ilUser->getId();
         }
@@ -67,19 +67,37 @@ class ilObjCamtasiaAccess extends ilObjectPluginAccess
             " WHERE id = ".$ilDB->quote($a_id, "integer")
         );
         $rec  = $ilDB->fetchAssoc($set);
-        return (boolean) $rec["is_online"];
+        if($rec !== null && $rec['is_online']) {
+                return (bool) $rec['is_online'];
+        }
+        return false;
     }
     /**
      * Check Playerfile status
      */
     static function checkPlayerfile($a_id)
-	{
-		global $ilDB;
+    {
+        global $ilDB;
 	
-		$set = $ilDB->query("SELECT player_file FROM rep_robj_xcam_data".
+        $set = $ilDB->query("SELECT player_file FROM rep_robj_xcam_data".
             " WHERE id = ".$ilDB->quote($a_id, "integer")
         );                    
-		$rec  = $ilDB->fetchAssoc($set);
-		return (boolean) $rec["player_file"];
-	}
+        $rec  = $ilDB->fetchAssoc($set);
+        return (boolean) $rec["player_file"];
+    }
+    public function canBeDelivered(ilWACPath $ilWACPath): bool
+    {
+        /**
+         * @var $ilAccess ilAccess
+         */
+        global $ilAccess;
+        preg_match("/\\/xcam_([\\d]*)\\//uism", $ilWACPath->getPath(), $results);
+
+        foreach (ilObject2::_getAllReferences($results[1]) as $ref_id) {
+            if ($ilAccess->checkAccess('read', '', $ref_id)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
