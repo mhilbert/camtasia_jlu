@@ -376,7 +376,7 @@ class ilObjCamtasia extends ilObjectPlugin
 		$tmpdir = ilFileUtils::ilTempnam();
 		ilFileUtils::makeDir($tmpdir);
         $filename= $this->getTempfile();
-        $temp_name = substr($_SERVER['SCRIPT_FILENAME'], 0, -10). "/Customizing/global/plugins/Services/Repository/RepositoryObject/Camtasia/templates/".$filename;;
+        $temp_name = ILIAS_ABSOLUTE_PATH . "/public/Customizing/global/plugins/Services/Repository/RepositoryObject/Camtasia/templates/".$filename;
 		copy($temp_name, $tmpdir."/".$filename);
 		ilFileUtils::unzip($tmpdir."/".$filename);
         unlink($tmpdir."/".$filename);

@@ -1,6 +1,6 @@
 <?php
 
-require_once 'Services/Xml/classes/class.ilSaxParser.php';
+require_once ILIAS_ABSOLUTE_PATH . '/components/ILIAS/Xml/classes/class.ilSaxParser.php';
 
 /**
  * Class ilCamtasiaXMLParser

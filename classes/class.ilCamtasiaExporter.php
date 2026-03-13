@@ -1,6 +1,6 @@
 <?php
 
-require_once("./Services/Export/classes/class.ilXmlExporter.php");
+require_once(ILIAS_ABSOLUTE_PATH . "/components/ILIAS/Export/classes/class.ilXmlExporter.php");
 
 /**
  * Class ilCamtasiaExporter
@@ -68,7 +68,7 @@ class ilCamtasiaExporter extends ilXmlExporter {
 
 	public function exportXMLMetaData()
 	{
-		require_once 'Services/MetaData/classes/class.ilMD2XML.php';
+		require_once ILIAS_ABSOLUTE_PATH . '/components/ILIAS/MetaData/classes/class.ilMD2XML.php';
 		$md2xml = new ilMD2XML($this->object->getId(), 0, $this->object->getType());
 		$md2xml->setExportMode(true);
 		$md2xml->startExport();
