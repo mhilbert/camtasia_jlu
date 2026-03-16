@@ -26,4 +26,9 @@ class ilCamtasiaPlugin extends ilRepositoryObjectPlugin
 	{
 		return false;
 	}
+
+	public static function _getIcon(string $a_type): string
+	{
+		return ILIAS_HTTP_PATH . "/Customizing/global/plugins/Services/Repository/RepositoryObject/Camtasia/templates/images/icon_xcam.svg";
+	}
 }
