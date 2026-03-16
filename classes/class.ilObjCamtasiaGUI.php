@@ -1,4 +1,6 @@
 <?php
+use ILIAS\UI\Component\Input\Container\Form\Standard;
+
 require_once(ILIAS_ABSOLUTE_PATH . "/components/ILIAS/File/classes/class.ilObjFileGUI.php");
 require_once(ILIAS_ABSOLUTE_PATH . "/components/ILIAS/Form/classes/class.ilFileInputGUI.php");
 
@@ -87,49 +89,47 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 		);
 	}
 
-		/**
+	/**
 	 * @param string $type
-	 * @return ilPropertyFormGUI
+	 * @return Standard
 	 */
-	public function  initCreateForm(string $type): ilPropertyFormGUI
+/**	public function initCreateForm(string $type): Standard
 	{
-		$form = parent::initCreateForm($type);
-		
-		// Send additional information
-		$form->setDescription($this->txt('limitations'));
+		$form_fields['title_and_description'] = (new ilObject())->getObjectProperties()->getPropertyTitleAndDescription()->toForm(
+			$this->lng,
+			$this->ui_factory->input()->field(),
+			$this->refinery
+		);
 
-		//Instant Online
-		$online = new ilCheckboxInputGUI($this->lng->txt('online'), 'online');
-		$form->addItem($online);
+		// Instant Online
+		$form_fields['online_status'] = (new ilObject())->getObjectProperties()->getPropertyIsOnline()->toForm(
+			$this->lng,
+			$this->ui_factory->input()->field(),
+			$this->refinery
+		);
 
-		// Http-Stream
-		$ht = new ilTextInputGUI($this->txt("stream"), "stream");
-		$ht->setMaxLength(128);
-		$ht->setSize(40);
-		$ht->setRequired(true);
-		//Example URL
-		$ht->setInfo($this->txt("stream_info") . " " . ilObjCamtasia::getEXURL());
-		$form->addItem($ht);  
+		// HTTP-Stream
+		$form_fields['stream'] = $this->ui_factory->input()->field()->text($this->plugin->txt('stream'))
+			->withMaxLength(128)
+			->withByline($this->txt("stream_info") . " " . ilObjCamtasia::getEXURL())
+			->withRequired(true);
 
-		// Template or new Zip?
-		$si = new ilRadioGroupInputGUI($this->txt("filesw"), "filesw");
-		$si->setRequired(true);
+		// Template or new ZIP?
+		$form_fields['filesw'] = $this->ui_factory->input()->field()->radio($this->plugin->txt('filesw'))
+			->withOption("new_file",       $this->plugin->txt('new_file'))
+			->withOption("tafel_template", $this->plugin->txt('tafel_template'), ilObjCamtasia::getTempfile() . " " . $this->plugin->txt("template_info"))
+			->withRequired(true)
+			->withValue("new_file");
 
-		$si2 = new ilRadioOption($this->txt("new_file"), "new_file");
-		$in_file = new ilFileInputGUI($this->txt("upload_file"), "upload_file");
-		$in_file->setRequired(true);
-		$in_file->setSuffixes(array("zip", "ZIP"));
-		$si2->addSubItem($in_file);
-		$si->addOption($si2);
-
-		$tt = new ilRadioOption($this->txt("tafel_template"), "tafel_template");
-		$tt->setInfo(ilObjCamtasia::getTempfile() . " " . $this->txt("template_info"));
-		$si->addOption($tt);
-		$si->setValue("new_file");
-		$form->addItem($si);
-
-		return $form;
-	}
+		return $this->ui_factory->input()->container()->form()->standard(
+			$this->ctrl->getFormAction($this, 'save'),
+			$form_fields
+		)->withSubmitLabel(
+			!$this->obj_definition->isPlugin($type)? $this->lng->txt($type . '_add') : ilObjectPlugin::lookupTxtById(
+				$this->requested_new_type, "{$this->requested_new_type}_add"
+			)
+		);
+	} */
 
 	/**
 	* Upload CamtasiaZipFile. This commands uses the form class to display an input form.
