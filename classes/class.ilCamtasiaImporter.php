@@ -1,6 +1,6 @@
 <?php
 
-require_once(ILIAS_ABSOLUTE_PATH . "/components/ILIAS/Export/classes/class.ilXmlImporter.php");
+require_once("./Services/Export/classes/class.ilXmlImporter.php");
 
 /**
  * Class ilCamtasiaImporter

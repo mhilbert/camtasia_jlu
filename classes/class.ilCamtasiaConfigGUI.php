@@ -37,7 +37,7 @@ class ilCamtasiaConfigGUI extends ilPluginConfigGUI
 
 		$pl = $this->getPluginObject();   
 
-		include_once(ILIAS_ABSOLUTE_PATH . "/components/ILIAS/Form/classes/class.ilPropertyFormGUI.php");
+		include_once("Services/Form/classes/class.ilPropertyFormGUI.php");
 		$form = new ilPropertyFormGUI();
 
 		//Videoserver
@@ -84,8 +84,7 @@ class ilCamtasiaConfigGUI extends ilPluginConfigGUI
             $tempfile = $form->getInput("template_file");
             
             //Check tempfile
-//          if (file_exists(substr($_SERVER['SCRIPT_FILENAME'], 0, -10). "/Customizing/global/plugins/Services/Repository/RepositoryObject/Camtasia/templates/".$tempfile)) {
-            if (file_exists(ILIAS_ABSOLUTE_PATH . "/public/Customizing/global/plugins/Services/Repository/RepositoryObject/Camtasia/templates/".$tempfile)) {
+            if (file_exists(substr($_SERVER['SCRIPT_FILENAME'], 0, -10). "/Customizing/global/plugins/Services/Repository/RepositoryObject/Camtasia/templates/".$tempfile)) {
             
             $this->setConfig($server, $exurl, $tempfile);            
 			$tpl->setOnScreenMessage('success',$pl->txt("config_saved"), true);

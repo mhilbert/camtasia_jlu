@@ -1,6 +1,6 @@
 <?php
-require_once(ILIAS_ABSOLUTE_PATH . "/components/ILIAS/File/classes/class.ilObjFileGUI.php");
-require_once(ILIAS_ABSOLUTE_PATH . "/components/ILIAS/Form/classes/class.ilFileInputGUI.php");
+require_once("./Modules/File/classes/class.ilObjFileGUI.php");
+require_once("./Services/Form/classes/class.ilFileInputGUI.php");
 
 /**
 * User Interface class for the camtasia repository object.
@@ -148,7 +148,7 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 	{
 		global $lng, $tpl;
 		
-		include_once(ILIAS_ABSOLUTE_PATH . "/components/ILIAS/Form/classes/class.ilPropertyFormGUI.php");
+		include_once("Services/Form/classes/class.ilPropertyFormGUI.php");
 		$form_gui = new ilPropertyFormGUI();
 		$form_gui->setTitle($this->txt("new_Camtasia"));
 		//$form_gui->setMultipart(TRUE);
@@ -479,8 +479,7 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 		if ($playerFile != "")
 		{
 			// Record read event
-			require_once(ILIAS_ABSOLUTE_PATH . '/components/ILIAS/Tracking/classes/class.ilChangeEvent.php');
-
+			require_once('Services/Tracking/classes/class.ilChangeEvent.php');
 			ilChangeEvent::_recordReadEvent($this->object->getType(), $this->object->getRefId(),
 				$this->object->getId(), $ilUser->getId());			
 
@@ -510,7 +509,7 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 			$tpl->loadStandardTemplate();
 
 			$ilTabs->activateTab("export");
-			include_once ILIAS_ABSOLUTE_PATH . '/components/ILIAS/Export/classes/class.ilExportGUI.php';
+			include_once './Services/Export/classes/class.ilExportGUI.php';
 			$exp_gui = new ilExportGUI($this);
 			 $exp_gui->addFormat('xml');
 			$exp_gui->addFormat("html", "", $this, "exportHTML");
@@ -529,7 +528,7 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 	function exportHTML()
 	{
 		$inst_id = IL_INST_ID;
-		include_once(ILIAS_ABSOLUTE_PATH . "/components/ILIAS/Export/classes/class.ilExport.php");
+		include_once("./Services/Export/classes/class.ilExport.php");
 		
 		ilExport::_createExportDirectory($this->object->getId(), "html", $this->object->getType());
 		$export_dir = ilExport::_getExportDirectory($this->object->getId(), "html", $this->object->getType());
